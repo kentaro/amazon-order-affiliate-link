@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Amazon Order Affiliate Link - 設定</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 20px;
+      max-width: 400px;
+    }
+    h1 {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 16px;
+      padding: 10px 20px;
+      background-color: #ff9900;
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #e68a00;
+    }
+    .status {
+      margin-top: 12px;
+      padding: 8px;
+      border-radius: 4px;
+      display: none;
+    }
+    .status.success {
+      display: block;
+      background-color: #d4edda;
+      color: #155724;
+    }
+  </style>
+</head>
+<body>
+  <h1>設定</h1>
+  <label for="affiliateTag">アフィリエイトタグ</label>
+  <input type="text" id="affiliateTag" placeholder="例: your-tag-22">
+  <button id="save">保存</button>
+  <div id="status" class="status"></div>
+  <script src="options.js"></script>
+</body>
+</html>

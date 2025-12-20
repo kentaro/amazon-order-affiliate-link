@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Amazon Order Affiliate Link",
+  "version": "1.0.0",
+  "description": "Amazonの注文履歴からアフィリエイトリンクをMarkdown形式でコピー",
+  "permissions": ["clipboardWrite", "storage"],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.amazon.co.jp/gp/css/order-history*",
+        "https://www.amazon.co.jp/your-orders/*"
+      ],
+      "js": ["content.js"],
+      "css": ["style.css"]
+    }
+  ]
+}
