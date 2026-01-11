@@ -12,7 +12,9 @@
     {
       "matches": [
         "https://www.amazon.co.jp/gp/css/order-history*",
-        "https://www.amazon.co.jp/your-orders/*"
+        "https://www.amazon.co.jp/your-orders/*",
+        "https://www.amazon.co.jp/*/dp/*",
+        "https://www.amazon.co.jp/dp/*"
       ],
       "js": ["content.js"],
       "css": ["style.css"]

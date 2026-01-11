@@ -88,7 +88,89 @@
     }, 2000);
   }
 
-  function addButtons() {
+  function createCopyButton(product) {
+    const btn = document.createElement('span');
+    btn.className = 'a-button a-button-normal a-button-base amazon-affiliate-copy-btn';
+    btn.innerHTML = `
+      <span class="a-button-inner">
+        <span class="a-button-text">リンクをコピー</span>
+      </span>
+    `;
+    btn.style.cursor = 'pointer';
+
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const markdown = generateMarkdown(product);
+      const success = await copyToClipboard(markdown);
+
+      if (success) {
+        showToast('コピーしました');
+      } else {
+        showToast('コピーに失敗しました', false);
+      }
+    });
+
+    return btn;
+  }
+
+  // 商品ページ用: 商品情報を抽出
+  function extractProductPageInfo() {
+    const asinMatch = window.location.pathname.match(/\/dp\/([A-Z0-9]{10})/);
+    if (!asinMatch) return null;
+
+    const asin = asinMatch[1];
+    const titleEl = document.getElementById('productTitle');
+    const title = titleEl ? titleEl.textContent.trim() : '';
+
+    // 著者情報を取得（複数著者対応）
+    let author = '';
+    const bylineInfo = document.getElementById('bylineInfo');
+    if (bylineInfo) {
+      const authorSpans = bylineInfo.querySelectorAll('.author');
+      const authors = [];
+      authorSpans.forEach(span => {
+        const link = span.querySelector('a');
+        const contribution = span.querySelector('.contribution');
+        if (link) {
+          let name = link.textContent.trim();
+          if (contribution) {
+            // カンマを除去して追加
+            name += ' ' + contribution.textContent.trim().replace(/,\s*$/, '');
+          }
+          authors.push(name);
+        }
+      });
+      author = authors.join(', ');
+    }
+
+    return {
+      title: title,
+      author: author,
+      asin: asin,
+      url: `https://www.amazon.co.jp/dp/${asin}?tag=${affiliateTag}`
+    };
+  }
+
+  // 商品ページにボタンを追加
+  function addProductPageButton() {
+    if (document.querySelector('.amazon-affiliate-copy-btn')) return;
+
+    const product = extractProductPageInfo();
+    if (!product || !product.title) return;
+
+    // タイトルの下にボタンを配置
+    const titleSection = document.getElementById('titleSection') || document.getElementById('title');
+    if (!titleSection) return;
+
+    const container = document.createElement('div');
+    container.style.marginTop = '10px';
+    container.appendChild(createCopyButton(product));
+
+    titleSection.parentNode.insertBefore(container, titleSection.nextSibling);
+  }
+
+  // 注文履歴ページにボタンを追加
+  function addOrderHistoryButtons() {
     const buttonLists = document.querySelectorAll('ul.yohtmlc-shipment-level-connections');
 
     buttonLists.forEach(ul => {
@@ -102,31 +184,18 @@
 
       const li = document.createElement('li');
       li.className = 'a-spacing-mini';
-
-      const btn = document.createElement('span');
-      btn.className = 'a-button a-button-normal a-button-base amazon-affiliate-copy-btn';
-      btn.innerHTML = `
-        <span class="a-button-inner">
-          <span class="a-button-text">リンクをコピー</span>
-        </span>
-      `;
-      btn.style.cursor = 'pointer';
-
-      btn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const markdown = generateMarkdown(product);
-        const success = await copyToClipboard(markdown);
-
-        if (success) {
-          showToast('コピーしました');
-        } else {
-          showToast('コピーに失敗しました', false);
-        }
-      });
-
-      li.appendChild(btn);
+      li.appendChild(createCopyButton(product));
       ul.appendChild(li);
     });
+  }
+
+  function addButtons() {
+    // 商品ページかどうかを判定
+    if (window.location.pathname.includes('/dp/')) {
+      addProductPageButton();
+    } else {
+      addOrderHistoryButtons();
+    }
   }
 
   function init() {
