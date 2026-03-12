@@ -54,9 +54,101 @@
     };
   }
 
+  function normalizeAuthorName(author) {
+    if (!author) return '';
+
+    const removableRoles = [
+      '共同著','著','著者',
+      '訳','訳者','翻訳',
+      '編','編纂','編集','編者',
+      '編集','編集者',
+      '監修','監訳',
+      '原作',
+      '写真','画','イラスト','イラストレーター',
+      '構成','解説','序文','推薦文','推薦',
+      '校閲','校正','前書き','あとがき','帯文','注','注釈',
+      '翻案','作曲','作詞','デザイン','制作','監督','挿絵','文芸','原案'
+    ];
+    const removableRolePrefix = removableRoles.map((r) => r + '');
+
+    const trimRoleSuffix = (text) => {
+      let target = text.trim();
+      while (true) {
+        let start = -1;
+        let end = -1;
+
+        const fullOpen = target.lastIndexOf('（');
+        const fullClose = target.lastIndexOf('）');
+        const halfOpen = target.lastIndexOf('(');
+        const halfClose = target.lastIndexOf(')');
+
+        if (fullOpen >= 0 && fullClose > fullOpen) {
+          start = fullOpen;
+          end = fullClose;
+        }
+
+        if (halfOpen >= 0 && halfClose > halfOpen &&
+            (start < 0 || halfOpen > start)) {
+          start = halfOpen;
+          end = halfClose;
+        }
+
+        if (start < 0) {
+          break;
+        }
+
+        const suffix = target.slice(start + 1, end).trim();
+        if (!suffix) {
+          break;
+        }
+
+        let normalizedSuffix = '';
+        let i = 0;
+        while (i < suffix.length) {
+          const ch = suffix[i];
+          if (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r' || ch === ',' || ch === '、' || ch === '・' || ch === ':' || ch === '：' || ch === '-' || ch === 'ー' || ch === '~' || ch === '〜' || ch === '/' ) {
+            i++;
+            continue;
+          }
+          break;
+        }
+
+        if (suffix.startsWith('共同', i)) {
+          normalizedSuffix = suffix.slice(i + 2);
+        } else {
+          normalizedSuffix = suffix.slice(i);
+        }
+
+        normalizedSuffix = normalizedSuffix.trim();
+        if (!removableRolePrefix.some(role => normalizedSuffix.startsWith(role))) {
+          break;
+        }
+
+        target = target.slice(0, start).trim();
+      }
+      return target;
+    };
+
+    const normalizeEntry = (entry) => {
+      let value = trimRoleSuffix(entry);
+      while (value.endsWith(',') || value.endsWith(' ') || value.endsWith('\t') || value.endsWith('\n') || value.endsWith('\r')) {
+        value = value.slice(0, -1).trimEnd();
+      }
+      return value.trim().replace(/\s+/g, '');
+    };
+
+    return author
+      .split(',')
+      .map((name) => normalizeEntry(name))
+      .filter(Boolean)
+      .join(', ');
+  }
+
   function generateMarkdown(product) {
-    if (product.author) {
-      return `${product.author}『[${product.title}](${product.url})』`;
+    const cleanAuthor = normalizeAuthorName(product.author || '');
+
+    if (cleanAuthor) {
+      return `${cleanAuthor}『[${product.title}](${product.url})』`;
     }
     return `『[${product.title}](${product.url})』`;
   }
